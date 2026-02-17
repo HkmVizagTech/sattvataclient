@@ -28,10 +28,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { mockCustomers, mockMenu } from "@/lib/mockData";
-import { CalendarIcon, Trash2, Plus, CreditCard, Truck, User, CheckCircle2, AlertCircle } from "lucide-react";
+import { mockCustomers as initialCustomers, mockMenu } from "@/lib/mockData";
+import { CalendarIcon, Trash2, Plus, CreditCard, Truck, User, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 // --- Schema Definition ---
 const orderSchema = z.object({
@@ -64,6 +65,9 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const isEditMode = !!params?.id;
+  const [customers, setCustomers] = useState(initialCustomers);
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "", company: "" });
 
   // Mock initial data if editing (simplified for prototype)
   const defaultValues: Partial<OrderFormValues> = {
@@ -94,13 +98,27 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
   const tax = subtotal * 0.05; // 5% GST mock
   const total = subtotal + tax;
 
+  const handleAddCustomer = () => {
+    if (!newCustomer.name || !newCustomer.phone) return;
+    const customer = {
+      id: `C-${Date.now()}`,
+      ...newCustomer,
+      totalOrders: 0,
+      outstandingBalance: 0
+    };
+    setCustomers([...customers, customer]);
+    form.setValue("customerId", customer.id);
+    setIsCustomerDialogOpen(false);
+    setNewCustomer({ name: "", phone: "", email: "", company: "" });
+    toast({ title: "Customer Added", description: `${customer.name} has been added and selected.` });
+  };
+
   const onSubmit = (data: OrderFormValues) => {
     console.log("Form Data:", data);
     toast({
       title: isEditMode ? "Order Updated" : "Order Created",
       description: `Order for ${format(data.eventDate, "PPP")} has been saved.`,
     });
-    // In a real app, we'd save to backend here
     setLocation("/orders");
   };
 
@@ -140,15 +158,50 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
                     name="customerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Customer</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel className="flex justify-between">
+                          Customer
+                          <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
+                            <DialogTrigger asChild>
+                              <button type="button" className="text-xs text-primary flex items-center gap-1 hover:underline">
+                                <UserPlus className="h-3 w-3" /> New Customer
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New Customer</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                  <label className="text-sm font-medium">Full Name</label>
+                                  <Input value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})} placeholder="e.g. Rahul Sharma" />
+                                </div>
+                                <div className="grid gap-2">
+                                  <label className="text-sm font-medium">Phone</label>
+                                  <Input value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})} placeholder="+91..." />
+                                </div>
+                                <div className="grid gap-2">
+                                  <label className="text-sm font-medium">Email (Optional)</label>
+                                  <Input value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})} placeholder="rahul@example.com" />
+                                </div>
+                                <div className="grid gap-2">
+                                  <label className="text-sm font-medium">Company (Optional)</label>
+                                  <Input value={newCustomer.company} onChange={e => setNewCustomer({...newCustomer, company: e.target.value})} placeholder="Company Name" />
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button type="button" onClick={handleAddCustomer}>Add & Select</Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} key={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select customer" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {mockCustomers.map(c => (
+                            {customers.map(c => (
                               <SelectItem key={c.id} value={c.id}>{c.name} ({c.company || 'Personal'})</SelectItem>
                             ))}
                           </SelectContent>

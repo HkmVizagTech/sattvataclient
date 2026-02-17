@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, FileText, Send, Check } from "lucide-react";
+import { Plus, Search, FileText, Send, Check, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 const mockQuotes = [
   { id: "QT-1001", customer: "TechStart Inc", date: "2024-10-20", amount: 85000, status: "Sent", validUntil: "2024-10-27" },
@@ -55,9 +56,12 @@ export default function Quotes() {
             <TableBody>
               {mockQuotes.map((quote) => (
                 <TableRow key={quote.id} className="hover:bg-slate-50/50">
-                  <TableCell className="font-medium text-primary flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    {quote.id}
+                  <TableCell className="font-medium text-primary">
+                    <Link href={`/orders/${quote.id.replace('QT', 'ORD')}`} className="flex items-center gap-2 hover:underline">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      {quote.id}
+                      <ArrowUpRight className="h-3 w-3 opacity-50" />
+                    </Link>
                   </TableCell>
                   <TableCell>{quote.customer}</TableCell>
                   <TableCell>{quote.date}</TableCell>

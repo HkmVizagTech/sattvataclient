@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Download, FileText } from "lucide-react";
+import { Search, Download, FileText, ArrowUpRight } from "lucide-react";
+import { Link } from "wouter";
 
 const mockPayments = [
-  { id: "PAY-9001", orderId: "ORD-7829", amount: 50000, method: "UPI", date: "2024-10-20", status: "Succeeded", reference: "UTR-123456789" },
-  { id: "PAY-9002", orderId: "ORD-7830", amount: 150000, method: "Gateway", date: "2024-10-22", status: "Succeeded", reference: "RAZOR-PAY-ID-55" },
-  { id: "PAY-9003", orderId: "ORD-7833", amount: 45000, method: "Cash", date: "2024-10-24", status: "Succeeded", reference: "Recv: John Doe" },
+  { id: "PAY-9001", orderId: "ORD-ISK-001", amount: 50000, method: "UPI", date: "2024-10-20", status: "Succeeded", reference: "UTR-123456789" },
+  { id: "PAY-9002", orderId: "ORD-ISK-002", amount: 150000, method: "Gateway", date: "2024-10-22", status: "Succeeded", reference: "RAZOR-PAY-ID-55" },
+  { id: "PAY-9003", orderId: "ORD-ISK-003", amount: 45000, method: "Cash", date: "2024-10-24", status: "Succeeded", reference: "Recv: John Doe" },
 ];
 
 export default function Payments() {
@@ -56,7 +57,12 @@ export default function Payments() {
               {mockPayments.map((pay) => (
                 <TableRow key={pay.id} className="hover:bg-slate-50/50">
                   <TableCell className="font-mono text-xs">{pay.id}</TableCell>
-                  <TableCell className="font-medium text-primary">{pay.orderId}</TableCell>
+                  <TableCell className="font-medium text-primary">
+                    <Link href={`/orders/${pay.orderId}/invoice`} className="flex items-center gap-1 hover:underline">
+                      {pay.orderId}
+                      <ArrowUpRight className="h-3 w-3 opacity-50" />
+                    </Link>
+                  </TableCell>
                   <TableCell>{pay.date}</TableCell>
                   <TableCell>{pay.method}</TableCell>
                   <TableCell className="text-xs text-muted-foreground font-mono">{pay.reference}</TableCell>
@@ -67,9 +73,11 @@ export default function Payments() {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                    <Link href={`/orders/${pay.orderId}/invoice`}>
+                      <Button variant="ghost" size="sm">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
