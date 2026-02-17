@@ -1,0 +1,382 @@
+Build an Internal Catering Operations Web App (Full‑Stack, TypeScript, Node/Express, React, PostgreSQL, Prisma, JWT, node-cron, file uploads, WhatsApp & UPI payment hooks, ERP integration)
+You are a senior full‑stack engineer. Create a production‑ready monorepo with:
+
+server/ (Node.js + Express + TypeScript)
+client/ (React + Vite + TypeScript)
+shared/ (types/interfaces)
+
+Core requirements (business features):
+
+Events Calendar
+
+Monthly/weekly/daily calendar of upcoming catering events/orders.
+Filters by department (Kitchen, Purchase, Dispatch, Sales).
+Click any event to view linked Order + tasks + reminders.
+
+
+Quotes
+
+Create, edit, and send Quotes/Estimates to customers with items from Menu.
+Convert Quote → Order.
+Versioning and status: Draft, Sent, Accepted, Rejected.
+
+
+Order Management
+
+Create order (from call/any medium). Select customer, event date/time, venue/address, menu items, headcount, special notes.
+Assign employees (per department or per order task).
+Vehicle dispatch details (vehicle number, driver name/phone, dispatch time, expected arrival).
+Status workflow: Draft → Confirmed → In-Prep → Dispatched → Delivered → Completed → Cancelled (with audit log).
+
+
+Billing & Payments
+
+When creating an order, show a Payment box:
+
+Collect % or custom amount now.
+Payment methods: UPI, Payment Gateway link (UPI-only), Cash.
+If UPI collected manually, capture UTR (Unique Transaction Reference).
+If Gateway selected, generate payment link (UPI-only) to be sent to customer; update status on webhook success.
+If Cash, capture cash receiver name & phone.
+
+
+Payments tab (proper accounting): support partial payments, balances, invoices after full or partial payments.
+Generate invoice PDFs (unique numbers, GST fields optional placeholders).
+
+
+Reminders & Scheduling
+
+Kitchen reminders: previous day (e.g., 5pm) and event day (e.g., 6am).
+Purchase reminders: 1 week and 3 days before event to check raw material availability.
+Previous day raw‑material confirmation: require photo uploads as proof.
+Customer payment reminders for dues.
+All reminders visible in a Reminders list and on the calendar; also support WhatsApp/SMS/email hooks.
+
+
+WhatsApp Integration (hooks/stubs)
+
+Send order updates & reminders to assigned employees and customers.
+Maintain message templates and a log of outbound messages.
+Provide /webhooks/whatsapp endpoint to receive message delivery/read receipts (stub).
+
+
+Tabs/Modules
+
+Dashboard: Pending fulfillments, payments to be received, upcoming events, top alerts.
+Customers: CRUD, contact details, order history, outstanding balance.
+Employees: CRUD, departments/roles, assignment to orders, WhatsApp opt-in flag.
+Sales: Quotes, conversions, revenue charts (placeholder).
+Menu: Menu categories & items (name, description, unit price, vegetarian flag, image).
+Payments: Ledger view, filters, export CSV.
+
+
+ERP Integration
+
+Stub a pluggable integration layer for pushing Sales Orders to an ERP (e.g., via REST).
+Include /integrations/erp/sales-order handler and a service interface with a mock implementation.
+Configurable via env vars.
+
+
+Invoices
+
+Generate invoices after full or partial payment.
+Show itemization, tax placeholders, received amounts, balance due.
+Downloadable as PDF; store reference in DB.
+
+
+
+
+Technical Stack & Non‑functional Requirements
+
+Backend: Node.js, Express, TypeScript
+Database: PostgreSQL + Prisma ORM
+Frontend: React + Vite + TypeScript; React Router; Zustand or Redux Toolkit for state
+Auth: JWT with role‑based access control (RBAC)
+Scheduling: node-cron (timezone Asia/Kolkata)
+Validation: Zod
+File Uploads: Multer → local /uploads in dev; abstraction for S3 in prod
+Payments Abstraction:
+
+Define PaymentProvider interface with methods to create UPI‑only payment links and handle webhooks.
+Provide a mock provider and a Razorpay‑style stub (do not include real keys).
+
+
+WhatsApp Abstraction:
+
+Define WhatsAppProvider interface with sendTemplateMessage() and webhook verify/ingest.
+Provide a mock provider and a Meta/Twilio‑style stub.
+
+
+ERP Abstraction:
+
+ERPProvider interface with createSalesOrder(order) method and mapping of Order → ERP payload.
+Provide mock implementation and sample mapping.
+
+
+PDFs: pdfkit or pdfmake for Invoices.
+Logging & Audits: request logging (morgan), audit trails for critical actions.
+Env & Config: .env with:
+DATABASE_URL=postgres://...
+JWT_SECRET=...
+TIMEZONE=Asia/Kolkata
+WHATSAPP_PROVIDER=mock
+PAYMENT_PROVIDER=mock
+ERP_PROVIDER=mock
+
+
+Docker (optional): docker-compose for Postgres.
+README: Full setup, env vars, seed data, how to run cron jobs, how to test webhooks.
+
+
+Data Model (Prisma schema outline)
+Create models (fields are indicative; adjust types as needed):
+
+User (id, name, email, phone, passwordHash, role [ADMIN|SALES|KITCHEN|PURCHASE|DISPATCH|ACCOUNTING], isActive, createdAt, updatedAt)
+Employee (id, userId?, name, phone, department [SALES|KITCHEN|PURCHASE|DISPATCH|ACCOUNTING], whatsappOptIn, createdAt)
+Customer (id, name, phone, email?, gstNumber?, billingAddress?, shippingAddress?, createdAt)
+MenuCategory (id, name)
+MenuItem (id, categoryId, name, description, unitPrice, vegetarian, imageUrl?)
+Quote (id, customerId, items[quantity, price, menuItemId], subtotal, tax, total, status[Draft|Sent|Accepted|Rejected], validUntil, notes, createdAt)
+Order (id, quoteId?, customerId, eventDate, eventTime, venueAddress, headcount, notes, status, createdByUserId, createdAt, updatedAt)
+OrderItem (id, orderId, menuItemId, quantity, price, notes?)
+Assignment (id, orderId, employeeId, role, notes?)
+VehicleDispatch (id, orderId, vehicleNumber, driverName, driverPhone, dispatchTime, eta, notes)
+Reminder (id, orderId, type[KitchenPrevDay|KitchenEventDay|PurchaseWeek|Purchase3Days|PaymentDue|RawMaterialConfirmPrevDay], scheduledAt, channel[WhatsApp|Email|SMS|InApp], status[Scheduled|Sent|Failed], payloadJson)
+Payment (id, orderId, method[UPI|Gateway|Cash], amount, collectedAt, collectedByName?, collectedByPhone?, utr?, gatewayLinkId?, gatewayRef?, status[Initiated|Succeeded|Failed], notes?)
+Invoice (id, orderId, invoiceNumber, issueDate, subtotal, tax, total, amountPaid, balanceDue, pdfUrl?)
+Notification (id, toCustomerId?, toEmployeeId?, channel, templateKey, paramsJson, status, sentAt)
+FileUpload (id, orderId?, type[RawMaterialProof|InvoicePDF|MenuImage], url, uploadedByUserId, createdAt)
+IntegrationLog (id, system[ERP|Payment|WhatsApp], direction[OUTBOUND|INBOUND], payloadJson, status, createdAt)
+AuditLog (id, userId?, action, entity, entityId, diffJson, createdAt)
+
+Add necessary relations and indexes.
+
+API Endpoints (Express)
+Auth
+
+POST /api/auth/register (admin only to create users)
+POST /api/auth/login → JWT
+
+Master Data
+
+GET/POST/PUT/DELETE /api/menu/categories
+GET/POST/PUT/DELETE /api/menu/items
+
+Customers & Employees
+
+GET/POST/PUT/DELETE /api/customers
+GET/POST/PUT/DELETE /api/employees
+
+Quotes
+
+GET/POST/PUT/DELETE /api/quotes
+POST /api/quotes/:id/send (stub send)
+POST /api/quotes/:id/accept → auto-create Order
+
+Orders
+
+GET/POST/PUT/DELETE /api/orders
+GET /api/orders/:id
+POST /api/orders/:id/assign (employees)
+POST /api/orders/:id/status (status transitions with audit)
+POST /api/orders/:id/vehicle-dispatch
+Creating an order must support immediate payment collection logic below.
+
+Payments
+
+POST /api/orders/:id/payments
+Request body supports:
+JSON{  "method": "UPI|Gateway|Cash",  "collectPercent": 30,  "collectAmount": 5000,  "utr": "123456789012",  "cashCollectorName": "John",  "cashCollectorPhone": "9xxxxxxxxx",  "note": "Advance"}Show more lines
+
+If UPI and utr present: record payment as Succeeded with UTR.
+If Gateway: create UPI‑only link via PaymentProvider, return paymentUrl, store as Initiated; expect webhook to mark Succeeded/Failed.
+If Cash: require cashCollectorName & cashCollectorPhone.
+
+
+GET /api/orders/:id/payments
+POST /api/payment/webhook (PaymentProvider webhook)
+
+Invoices
+
+POST /api/orders/:id/invoices (create invoice after full/partial payments)
+GET /api/invoices/:id/pdf
+
+Reminders & Calendar
+
+GET /api/calendar (events aggregated from Orders + Reminders)
+GET/POST /api/orders/:id/reminders (create/list manual reminders)
+Cron jobs must auto‑schedule reminders on order creation/update.
+
+WhatsApp
+
+POST /api/whatsapp/send (to employee/customer using templates)
+POST /webhooks/whatsapp (ingest delivery/read receipts)
+
+Uploads
+
+POST /api/uploads/raw-material-proof?orderId=... (Multer)
+GET /uploads/:filename (dev only, static)
+
+ERP
+
+POST /api/integrations/erp/sales-order/:orderId (push specific order to ERP)
+GET /api/integrations/erp/logs
+
+
+Frontend (React)
+Global
+
+Auth pages (Login), protected routes by role.
+Layout with left nav: Dashboard, Orders, Quotes, Customers, Employees, Menu, Payments, Calendar, Settings.
+
+Pages
+
+Dashboard: tiles for “Fulfillments Pending”, “Payments to be Received”, upcoming events (7 days), quick actions.
+Quotes: list, filter, create/edit, send, accept.
+Orders: list, search, filter by status/date/customer; create/edit view:
+
+Customer picker / quick create
+Event date/time, venue
+Menu item picker with quantities & per‑item notes
+Payment box: choose % or custom amount; choose method (UPI, Gateway, Cash) with dynamic fields (UTR / payment link / cash collector)
+Assignment of employees
+Vehicle dispatch sub‑section
+Notes
+Timeline with audit logs
+
+
+Payments: ledger of payments (status, method, UTR, collector, gateway ref), totals & filters.
+Invoices: view/download.
+Calendar: monthly/weekly view; filter by department; click-through to Order.
+Customers: CRUD, history, outstanding balance.
+Employees: CRUD, department, WhatsApp opt-in, assignment list.
+Menu: categories & items; image upload.
+Settings: Message templates, integration keys (stored only client→server via secure forms; server keeps in env).
+
+UX
+
+All forms validated with Zod.
+Toasts for success/errors.
+Timezone: Asia/Kolkata.
+
+
+Automations (node-cron)
+On Order creation/update, schedule:
+
+Kitchen:
+
+Previous day 17:00 → reminder.
+Event day 06:00 → reminder.
+
+
+Purchase:
+
+7 days prior 10:00 → raw material availability check.
+3 days prior 10:00 → follow-up.
+
+
+Raw material proof:
+
+Previous day 18:00 → request confirmation with photo upload link.
+
+
+Payment reminders:
+
+If balance due, send reminder D‑1 and D+2 relative to event date.
+
+
+
+Each job should:
+
+Create a Reminder record.
+Send via WhatsAppProvider (mock) + In‑app notification + log IntegrationLog.
+Be idempotent (don’t duplicate).
+
+
+Message Templates (examples)
+
+order_confirmed_to_customer: “Your catering order #{orderNumber} on {eventDate} is confirmed. Balance due: ₹{balance}. Thanks!”
+kitchen_prev_day: “Prep reminder for Order #{orderNumber} on {eventDate} at {venue}. Headcount: {headcount}.”
+purchase_week_check: “RM availability check for Order #{orderNumber} (event {eventDate}).”
+payment_link: “Please pay ₹{amount} for Order #{orderNumber}: {paymentUrl}”
+raw_material_proof_request: “Please upload raw material photos for Order #{orderNumber}: {uploadUrl}”
+
+Store templates in DB with placeholders.
+
+Payment Flow (UPI/Link/Cash)
+
+Collect Now:
+
+If % selected, compute collectAmount = round(total * percent/100).
+If custom selected, use provided collectAmount.
+
+
+UPI Manual: require UTR field → mark Succeeded instantly; store utr.
+Gateway Link: create UPI‑only link (via PaymentProvider stub), send WhatsApp with link, store as Initiated. On webhook, update Payment to Succeeded/Failed and recompute balance.
+Cash: require collectorName & collectorPhone.
+
+Invoices should reflect partials: total, amountPaid, balanceDue.
+
+ERP Integration (Stub)
+
+Map Order → ERP Sales Order JSON:
+{
+  "externalId": "ORDER-{id}",
+  "customer": { "name": "...", "phone": "...", "gstNumber": "..." },
+  "date": "YYYY-MM-DD",
+  "items": [{ "sku": "MENU-{menuItemId}", "name": "...", "qty": 10, "rate": 250 }],
+  "subtotal": ...,
+  "tax": ...,
+  "total": ...
+}
+
+
+Implement ERPProvider with createSalesOrder(order) and log to IntegrationLog.
+Provide mock implementation; real credentials pulled from env.
+
+
+Security & RBAC
+
+Roles: ADMIN, SALES, KITCHEN, PURCHASE, DISPATCH, ACCOUNTING.
+Access rules:
+
+SALES: Quotes, Orders (create/edit), Customers.
+KITCHEN: Calendar, Reminders, Orders (read), status changes to In‑Prep/Completed.
+PURCHASE: Reminders, upload raw material proof, Orders (read).
+DISPATCH: Vehicle details, status Dispatched/Delivered.
+ACCOUNTING: Payments, Invoices, Reports.
+ADMIN: all.
+
+
+Log all critical actions in AuditLog.
+
+
+Developer Experience
+
+Seed script: creates demo users, customers, menu items, and a few orders with scheduled reminders.
+ESLint + Prettier.
+Error handler middleware with consistent error shape.
+Unit tests for services (PaymentProvider, WhatsAppProvider, ERPProvider) with mocks.
+README must include:
+
+Setup (env vars), DB migration, seeding.
+How to run server & client.
+How to test payment & WhatsApp webhooks with mock payloads.
+How cron jobs are registered and how timezone is enforced.
+
+
+
+
+Acceptance Criteria (must pass)
+
+Create an Order with 30% upfront via Gateway link → see payment link URL; on mock webhook call, payment status updates and balance recalculates; invoice can be generated.
+Create an Order with manual UPI and UTR captured → payment marked Succeeded and shown in Payments tab.
+Create an Order with Cash → collector’s name & phone required.
+Calendar shows events and reminders for Kitchen & Purchase with correct dates (Week‑7/3/Prev Day/Event Day).
+Upload raw material photos tied to an Order (Previous day), visible to Purchase/Kitchen.
+WhatsApp send endpoint logs outbound messages; templates render placeholders.
+ERP Sales Order push creates an IntegrationLog entry with mapped payload.
+Dashboard shows Fulfillments Pending and Payments to be Received tiles with correct counts.
+
+
+Deliverables: Working full‑stack app with server, client, DB schema & migrations, seed data, cron jobs, mock integrations, PDF invoices, complete README.
