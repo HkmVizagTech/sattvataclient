@@ -13,6 +13,7 @@ import Customers from "@/pages/customers";
 import Quotes from "@/pages/quotes";
 import Payments from "@/pages/payments";
 import Kitchen from "@/pages/kitchen";
+import InvoicePage from "@/pages/invoice";
 import { Layout } from "@/components/layout";
 
 function Router() {
@@ -23,14 +24,13 @@ function Router() {
         <Route path="/orders" component={Orders} />
         <Route path="/orders/new" component={OrderDetails} />
         <Route path="/orders/:id" component={OrderDetails} />
+        <Route path="/orders/:id/invoice" component={InvoicePage} />
         <Route path="/calendar" component={CalendarPage} />
         <Route path="/menu" component={MenuPage} />
         <Route path="/customers" component={Customers} />
         <Route path="/quotes" component={Quotes} />
         <Route path="/payments" component={Payments} />
         <Route path="/kitchen" component={Kitchen} />
-        
-        {/* Placeholder routes */}
         <Route path="/settings" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

@@ -8,6 +8,7 @@ export interface Order {
   items: string[];
   venue: string;
   headcount: number;
+  gstNumber?: string;
 }
 
 export interface MenuItem {
@@ -25,88 +26,67 @@ export interface Customer {
   email: string;
   phone: string;
   company?: string;
+  gstNumber?: string;
   totalOrders: number;
   outstandingBalance: number;
 }
 
 export const mockOrders: Order[] = [
   {
-    id: "ORD-7829",
-    customerName: "Acme Corp Annual Meet",
+    id: "ORD-ISK-001",
+    customerName: "Radha Krishna Temple Feast",
     eventDate: "2024-10-25",
     status: "Confirmed",
     totalAmount: 125000,
     balanceDue: 50000,
-    items: ["Gourmet Lunch Buffet", "Coffee Station", "Evening Snacks"],
-    venue: "Grand Hyatt Conference Hall A",
-    headcount: 150
+    items: ["Satvik Thali", "Kheer Prasad", "Fruit Salad"],
+    venue: "ISKCON Temple Hall",
+    headcount: 500,
+    gstNumber: "27AAACI1234A1Z1"
   },
   {
-    id: "ORD-7830",
-    customerName: "Sarah's Wedding Reception",
+    id: "ORD-ISK-002",
+    customerName: "Govinda's Corporate Lunch",
     eventDate: "2024-10-28",
     status: "In-Prep",
-    totalAmount: 450000,
-    balanceDue: 0,
-    items: ["Premium Wedding Feast", "Live Pasta Counter", "Dessert Bar"],
-    venue: "Green Meadows Resort",
-    headcount: 300
-  },
-  {
-    id: "ORD-7831",
-    customerName: "TechStart Hackathon",
-    eventDate: "2024-11-02",
-    status: "Draft",
-    totalAmount: 85000,
-    balanceDue: 85000,
-    items: ["Pizza & Burgers", "Energy Drinks", "Midnight Snacks"],
-    venue: "TechStart HQ, 4th Floor",
-    headcount: 80
-  },
-  {
-    id: "ORD-7832",
-    customerName: "City Hospital Gala",
-    eventDate: "2024-11-05",
-    status: "Dispatched",
-    totalAmount: 210000,
-    balanceDue: 20000,
-    items: ["Healthy Gourmet Dinner", "Fresh Juices", "Salad Bar"],
-    venue: "City Convention Center",
-    headcount: 200
-  },
-  {
-    id: "ORD-7833",
-    customerName: "Private Birthday Party",
-    eventDate: "2024-11-10",
-    status: "Completed",
     totalAmount: 45000,
     balanceDue: 0,
-    items: ["Kids Menu", "Birthday Cake", "Soft Drinks"],
-    venue: "123 Maple Drive",
-    headcount: 40
+    items: ["Executive Satvik Meal", "Lassi"],
+    venue: "Reliance Corporate Park",
+    headcount: 100
+  },
+  {
+    id: "ORD-ISK-003",
+    customerName: "Janmashtami Celebration",
+    eventDate: "2024-11-02",
+    status: "Draft",
+    totalAmount: 850000,
+    balanceDue: 850000,
+    items: ["Maha Prasad", "56 Bhog Selection"],
+    venue: "Main Altar Area",
+    headcount: 2000
   }
 ];
 
 export const mockMenu: MenuItem[] = [
-  { id: "M-001", name: "Paneer Tikka Masala", category: "Main Course", price: 350, isVeg: true },
-  { id: "M-002", name: "Butter Chicken", category: "Main Course", price: 450, isVeg: false },
-  { id: "M-003", name: "Dal Makhani", category: "Main Course", price: 280, isVeg: true },
-  { id: "M-004", name: "Garlic Naan", category: "Breads", price: 60, isVeg: true },
-  { id: "M-005", name: "Jeera Rice", category: "Rice", price: 180, isVeg: true },
-  { id: "M-006", name: "Gulab Jamun", category: "Dessert", price: 120, isVeg: true },
-  { id: "M-007", name: "Chicken Biryani", category: "Main Course", price: 400, isVeg: false },
-  { id: "M-008", name: "Vegetable Spring Rolls", category: "Starters", price: 220, isVeg: true },
+  { id: "V-001", name: "Paneer Butter Masala (No Onion Garlic)", category: "Main Course", price: 350, isVeg: true },
+  { id: "V-002", name: "Satvik Mixed Veg", category: "Main Course", price: 280, isVeg: true },
+  { id: "V-003", name: "Dal Maharani", category: "Main Course", price: 250, isVeg: true },
+  { id: "V-004", name: "Butter Naan (Eggless)", category: "Breads", price: 60, isVeg: true },
+  { id: "V-005", name: "Saffron Pulao", category: "Rice", price: 220, isVeg: true },
+  { id: "V-006", name: "Rabri with Malpua", category: "Dessert", price: 180, isVeg: true },
+  { id: "V-007", name: "Kheer Prasad", category: "Dessert", price: 100, isVeg: true },
+  { id: "V-008", name: "Crispy Bhindi Fry", category: "Sides", price: 180, isVeg: true },
 ];
 
 export const mockCustomers: Customer[] = [
-  { id: "C-001", name: "Acme Corp", email: "events@acmecorp.com", phone: "+91 98765 43210", company: "Acme Corp", totalOrders: 12, outstandingBalance: 50000 },
-  { id: "C-002", name: "Sarah Jenkins", email: "sarah.j@gmail.com", phone: "+91 98765 12345", totalOrders: 1, outstandingBalance: 0 },
-  { id: "C-003", name: "TechStart Inc", email: "admin@techstart.io", phone: "+91 91234 56789", company: "TechStart", totalOrders: 5, outstandingBalance: 85000 },
+  { id: "C-001", name: "ISKCON Pune", email: "pune@iskcon.org", phone: "+91 20 2426 0321", gstNumber: "27AAATI1234A1Z1", totalOrders: 45, outstandingBalance: 50000 },
+  { id: "C-002", name: "Govind Das", email: "govind@gmail.com", phone: "+91 98765 12345", totalOrders: 2, outstandingBalance: 0 },
 ];
 
 export const mockStats = [
-  { title: "Pending Fulfillments", value: "3", change: "+1 today", icon: "Clock" },
-  { title: "Payments Pending", value: "₹1.35L", change: "Due this week", icon: "IndianRupee" },
-  { title: "Upcoming Events", value: "8", change: "Next 7 days", icon: "Calendar" },
-  { title: "Active Quotes", value: "12", change: "4 sent today", icon: "FileText" },
+  { title: "Prasad Fulfillments", value: "8", change: "+3 today", icon: "Clock" },
+  { title: "Revenue (Incl. GST)", value: "₹4.85L", change: "Monthly Growth: 12%", icon: "IndianRupee" },
+  { title: "Upcoming Festivals", value: "3", change: "Next 14 days", icon: "Calendar" },
+  { title: "Active Quotes", value: "15", change: "5 pending approval", icon: "FileText" },
 ];

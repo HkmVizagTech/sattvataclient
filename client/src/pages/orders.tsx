@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockOrders } from "@/lib/mockData";
-import { Plus, Search, Filter, Download } from "lucide-react";
+import { Plus, Search, Filter, Download, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "wouter";
 
 function StatusBadge({ status }: { status: string }) {
@@ -40,18 +39,18 @@ export default function Orders() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
-          <p className="text-muted-foreground mt-1">Manage catering orders and status workflows.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-primary">Catering Orders</h1>
+          <p className="text-muted-foreground mt-1">Satvik Seva Management for ISKCON.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Report
           </Button>
           <Link href="/orders/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Create Order
+              New Seva Order
             </Button>
           </Link>
         </div>
@@ -65,7 +64,6 @@ export default function Orders() {
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="drafts">Drafts</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="flex items-center gap-2">
@@ -79,9 +77,6 @@ export default function Orders() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </CardHeader>
@@ -93,9 +88,7 @@ export default function Orders() {
                   <TableHead className="w-[100px]">Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Event Date</TableHead>
-                  <TableHead>Venue</TableHead>
-                  <TableHead>Headcount</TableHead>
-                  <TableHead>Total</TableHead>
+                  <TableHead>Total (₹)</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -103,26 +96,29 @@ export default function Orders() {
               <TableBody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => (
-                    <Link key={order.id} href={`/orders/${order.id}`}>
-                      <TableRow className="cursor-pointer hover:bg-slate-50/50">
-                        <TableCell className="font-medium text-primary">{order.id}</TableCell>
-                        <TableCell>{order.customerName}</TableCell>
-                        <TableCell>{order.eventDate}</TableCell>
-                        <TableCell className="truncate max-w-[150px]" title={order.venue}>{order.venue}</TableCell>
-                        <TableCell>{order.headcount}</TableCell>
-                        <TableCell>₹{order.totalAmount.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <StatusBadge status={order.status} />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">View</Button>
-                        </TableCell>
-                      </TableRow>
-                    </Link>
+                    <TableRow key={order.id} className="cursor-pointer hover:bg-slate-50/50">
+                      <TableCell className="font-medium text-primary">{order.id}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell>{order.eventDate}</TableCell>
+                      <TableCell>₹{order.totalAmount.toLocaleString('en-IN')}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={order.status} />
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Link href={`/orders/${order.id}`}>
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </Link>
+                        <Link href={`/orders/${order.id}/invoice`}>
+                          <Button variant="ghost" size="sm" className="text-primary">
+                            <FileText className="h-4 w-4 mr-1" /> Invoice
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No orders found.
                     </TableCell>
                   </TableRow>
