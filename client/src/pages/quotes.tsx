@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -20,10 +21,12 @@ export default function Quotes() {
           <h1 className="text-3xl font-bold tracking-tight">Quotes</h1>
           <p className="text-muted-foreground mt-1">Create and manage estimates for potential events.</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Quote
-        </Button>
+        <Link href="/quotes/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Quote
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -57,7 +60,7 @@ export default function Quotes() {
               {mockQuotes.map((quote) => (
                 <TableRow key={quote.id} className="hover:bg-slate-50/50">
                   <TableCell className="font-medium text-primary">
-                    <Link href={`/orders/${quote.id.replace('QT', 'ORD')}`} className="flex items-center gap-2 hover:underline">
+                    <Link href={`/quotes/${quote.id}`} className="flex items-center gap-2 hover:underline">
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       {quote.id}
                       <ArrowUpRight className="h-3 w-3 opacity-50" />

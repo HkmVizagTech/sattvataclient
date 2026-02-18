@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockMenu as initialMenu } from "@/lib/mockData";
-import { Plus, Search, Edit2, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Edit2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 export default function MenuPage() {
@@ -157,11 +158,3 @@ export default function MenuPage() {
     </div>
   );
 }
-
-// Minimal select component for the dialog if UI kit doesn't have it ready
-import { Select as UISelect, SelectContent as UISelectContent, SelectItem as UISelectItem, SelectTrigger as UISelectTrigger, SelectValue as UISelectValue } from "@/components/ui/select";
-const Select = UISelect;
-const SelectContent = UISelectContent;
-const SelectItem = UISelectItem;
-const SelectTrigger = UISelectTrigger;
-const SelectValue = UISelectValue;

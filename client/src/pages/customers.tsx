@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockCustomers } from "@/lib/mockData";
-import { Plus, Search, MoreHorizontal, Mail, Phone, Building } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Customers() {
   return (
@@ -47,8 +49,12 @@ export default function Customers() {
             </TableHeader>
             <TableBody>
               {mockCustomers.map((customer) => (
-                <TableRow key={customer.id} className="cursor-pointer hover:bg-slate-50/50">
-                  <TableCell className="font-medium">{customer.name}</TableCell>
+                <TableRow key={customer.id} className="hover:bg-slate-50/50">
+                  <TableCell className="font-medium">
+                    <Link href={`/customers/${customer.id}`} className="text-primary hover:underline">
+                      {customer.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{customer.company || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-col text-sm">

@@ -29,8 +29,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { mockCustomers as initialCustomers, mockMenu } from "@/lib/mockData";
-import { CalendarIcon, Trash2, Plus, CreditCard, Truck, User, CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
-import { useLocation } from "wouter";
+import { CalendarIcon, Trash2, Plus, CreditCard, Truck, User, CheckCircle2, AlertCircle, UserPlus, Save } from "lucide-react";
+import { useLocation, useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
@@ -61,10 +61,11 @@ const orderSchema = z.object({
 
 type OrderFormValues = z.infer<typeof orderSchema>;
 
-export default function OrderDetails({ params }: { params?: { id?: string } }) {
+export default function OrderDetails() {
+  const { id } = useParams();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const isEditMode = !!params?.id;
+  const isEditMode = !!id;
   const [customers, setCustomers] = useState(initialCustomers);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "", company: "" });
@@ -128,12 +129,12 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{isEditMode ? "Edit Order" : "New Order"}</h1>
           <p className="text-muted-foreground mt-1">
-            {isEditMode ? `Managing Order #${params?.id}` : "Create a new catering order"}
+            {isEditMode ? `Managing Order #${id}` : "Create a new catering order"}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setLocation("/orders")}>Cancel</Button>
-          <Button onClick={form.handleSubmit(onSubmit)}>Save Order</Button>
+          <Button onClick={form.handleSubmit(onSubmit)}><Save className="mr-2 h-4 w-4" /> Save Order</Button>
         </div>
       </div>
 
@@ -158,13 +159,13 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
                     name="customerId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex justify-between">
+                        <FormLabel className="flex justify-between items-center">
                           Customer
                           <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
                             <DialogTrigger asChild>
-                              <button type="button" className="text-xs text-primary flex items-center gap-1 hover:underline">
+                              <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-primary flex items-center gap-1 hover:underline p-0">
                                 <UserPlus className="h-3 w-3" /> New Customer
-                              </button>
+                              </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
@@ -194,7 +195,7 @@ export default function OrderDetails({ params }: { params?: { id?: string } }) {
                             </DialogContent>
                           </Dialog>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} key={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select customer" />

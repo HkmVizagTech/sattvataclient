@@ -10,7 +10,6 @@ import {
   MoreHorizontal,
   Plus,
   Truck,
-  CheckCircle2,
   AlertCircle
 } from "lucide-react";
 import { Link } from "wouter";
@@ -22,6 +21,13 @@ const iconMap: any = {
   IndianRupee: IndianRupee,
   Calendar: CalendarIcon,
   FileText: FileText,
+};
+
+const routeMap: any = {
+  "Pending Fulfillments": "/kitchen",
+  "Payments Pending": "/payments",
+  "Upcoming Events": "/calendar",
+  "Active Quotes": "/quotes",
 };
 
 const revenueData = [
@@ -61,7 +67,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground mt-1">Welcome back, John. Here's what's happening today.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/quotes">
+          <Link href="/quotes/new">
             <Button variant="outline">
               <FileText className="mr-2 h-4 w-4" />
               New Quote
@@ -79,21 +85,24 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {mockStats.map((stat, i) => {
           const Icon = iconMap[stat.icon];
+          const href = routeMap[stat.title];
           return (
-            <Card key={i} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stat.change}
-                </p>
-              </CardContent>
-            </Card>
+            <Link key={i} href={href}>
+              <Card className="hover:shadow-md transition-all cursor-pointer hover:border-primary/50 group">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-primary">
+                    {stat.title}
+                  </CardTitle>
+                  <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    {stat.change} <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
@@ -156,29 +165,10 @@ export default function Dashboard() {
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueData}>
-                    <XAxis 
-                      dataKey="name" 
-                      stroke="#888888" 
-                      fontSize={12} 
-                      tickLine={false} 
-                      axisLine={false} 
-                    />
-                    <YAxis
-                      stroke="#888888"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(value) => `₹${value}`}
-                    />
-                    <Tooltip 
-                      cursor={{fill: 'transparent'}}
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Bar
-                      dataKey="total"
-                      fill="hsl(var(--primary))"
-                      radius={[4, 4, 0, 0]}
-                    />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+                    <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

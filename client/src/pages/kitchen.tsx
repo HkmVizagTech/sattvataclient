@@ -3,9 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockOrders } from "@/lib/mockData";
 import { Clock, CheckCircle2, AlertTriangle, ChefHat } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Kitchen() {
-  // Filter for orders that are relevant to kitchen (Confirmed, In-Prep)
   const kitchenOrders = mockOrders.filter(o => ["Confirmed", "In-Prep"].includes(o.status));
 
   return (
@@ -38,7 +38,9 @@ export default function Kitchen() {
                   {order.status}
                 </Badge>
               </div>
-              <CardTitle className="text-lg mt-2">{order.customerName}</CardTitle>
+              <Link href={`/orders/${order.id}`}>
+                <CardTitle className="text-lg mt-2 cursor-pointer hover:text-primary transition-colors">{order.customerName}</CardTitle>
+              </Link>
               <CardDescription className="flex items-center gap-1">
                 <Clock className="h-3 w-3" /> Due: 12:00 PM (Mock Time)
               </CardDescription>
@@ -56,7 +58,6 @@ export default function Kitchen() {
                      ))}
                    </ul>
                 </div>
-                
                 <div className="flex items-center justify-between text-sm">
                    <span className="text-muted-foreground">Headcount:</span>
                    <span className="font-bold">{order.headcount} Pax</span>
@@ -77,7 +78,6 @@ export default function Kitchen() {
           </Card>
         ))}
 
-        {/* Empty State / Next Day Placeholder */}
         <Card className="border-dashed flex flex-col items-center justify-center p-6 text-muted-foreground min-h-[300px] bg-slate-50/50">
            <AlertTriangle className="h-10 w-10 mb-2 opacity-20" />
            <p>No more immediate orders for today.</p>
