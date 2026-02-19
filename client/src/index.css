@@ -58,98 +58,92 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
-/* Professional Enterprise Theme - Slate/Blue/Gray */
+/* Higher Taste Branding Theme - Maroon & Gray */
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 0 0% 100%;
+  --foreground: 333 63% 15%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 333 63% 15%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 333 63% 15%;
 
-  /* Brand Blue - Trustworthy & Professional */
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
+  /* Logo Maroon: #7D1D4D approx */
+  --primary: 330 63% 30%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 333 63% 15%;
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
 
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222 47% 11.2%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 330 63% 30%;
 
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 98%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 53%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 330 63% 30%;
 
   --radius: 0.5rem;
 
-  --chart-1: 221 83% 53%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  --chart-1: 330 63% 30%;
+  --chart-2: 0 0% 50%;
+  --chart-3: 330 63% 45%;
+  --chart-4: 0 0% 70%;
+  --chart-5: 330 63% 60%;
 
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 221 83% 53%;
+  --sidebar: 333 63% 10%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 330 63% 30%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217 33% 17%;
-  --sidebar-ring: 224.3 76.3% 48%;
+  --sidebar-accent: 333 63% 15%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 333 63% 15%;
+  --sidebar-ring: 330 63% 30%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  --background: 333 63% 5%;
+  --foreground: 0 0% 98%;
 
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+  --card: 333 63% 5%;
+  --card-foreground: 0 0% 98%;
 
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 333 63% 5%;
+  --popover-foreground: 0 0% 98%;
 
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  --primary: 330 63% 45%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 333 63% 15%;
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 333 63% 15%;
+  --muted-foreground: 0 0% 65%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 333 63% 15%;
+  --accent-foreground: 0 0% 98%;
 
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive-foreground: 0 0% 98%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --border: 333 63% 15%;
+  --input: 333 63% 15%;
+  --ring: 330 63% 45%;
 
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar: 333 63% 5%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 330 63% 45%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-ring: 224.3 76.3% 48%;
+  --sidebar-accent: 333 63% 15%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 333 63% 15%;
+  --sidebar-ring: 330 63% 45%;
 }
 
 @layer base {

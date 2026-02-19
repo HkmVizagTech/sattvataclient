@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileText, Download, Printer, CheckCircle2, QrCode } from "lucide-react";
+import { Download, Printer, CheckCircle2, QrCode } from "lucide-react";
 import { mockOrders } from "@/lib/mockData";
 import { useParams } from "wouter";
+import { Separator } from "@/components/ui/separator";
+import logoImg from "@assets/HIgher_taste_logo_1771483400145.png";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -33,15 +35,20 @@ export default function InvoicePage() {
         <CardContent className="p-12 space-y-8">
           {/* Header */}
           <div className="flex justify-between items-start">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 font-bold text-2xl text-primary">
-                <div className="h-10 w-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">I</div>
-                <span>ISKCON Catering Services</span>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <img src={logoImg} alt="Higher Taste" className="h-16 w-auto" />
+                <div>
+                  <h1 className="text-3xl font-bold text-primary leading-none">The Higher Taste</h1>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mt-1">Catering Services</p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Hare Krishna Hill, Sant Nagar, Main Road, East of Kailash, New Delhi, Delhi 110065
-              </p>
-              <p className="text-sm font-semibold">GSTIN: 07AAATI1234A1Z1</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  Hare Krishna Hill, Sant Nagar, Main Road, East of Kailash, New Delhi, Delhi 110065
+                </p>
+                <p className="text-sm font-bold text-primary">GSTIN: 07AAATI1234A1Z1</p>
+              </div>
             </div>
             <div className="text-right space-y-1">
               <h2 className="text-3xl font-light uppercase tracking-widest text-muted-foreground">Invoice</h2>
@@ -56,7 +63,7 @@ export default function InvoicePage() {
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Bill To:</h3>
-              <p className="font-bold">{order.customerName}</p>
+              <p className="font-bold text-lg">{order.customerName}</p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{order.venue}</p>
               {order.gstNumber && <p className="text-sm font-semibold">GSTIN: {order.gstNumber}</p>}
             </div>
@@ -64,19 +71,19 @@ export default function InvoicePage() {
               <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Event Details:</h3>
               <p className="text-sm">Date: <span className="font-medium">{order.eventDate}</span></p>
               <p className="text-sm">Headcount: <span className="font-medium">{order.headcount} Pax</span></p>
-              <Badge variant="outline" className="mt-2">{order.status}</Badge>
+              <Badge className="mt-2 bg-primary">{order.status}</Badge>
             </div>
           </div>
 
           {/* Table */}
-          <div className="rounded-md border">
+          <div className="rounded-md border border-primary/20">
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-primary/5">
                 <TableRow>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Rate</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-primary font-bold">Description</TableHead>
+                  <TableHead className="text-right text-primary font-bold">Rate</TableHead>
+                  <TableHead className="text-right text-primary font-bold">Qty</TableHead>
+                  <TableHead className="text-right text-primary font-bold">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -94,27 +101,27 @@ export default function InvoicePage() {
 
           {/* Totals */}
           <div className="flex justify-end">
-            <div className="w-64 space-y-2">
+            <div className="w-72 space-y-2 bg-slate-50 p-4 rounded-lg border">
               <div className="flex justify-between text-sm">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground italic">
+              <div className="flex justify-between text-xs text-muted-foreground italic">
                 <span>CGST (2.5%)</span>
                 <span>₹{cgst.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground italic">
+              <div className="flex justify-between text-xs text-muted-foreground italic">
                 <span>SGST (2.5%)</span>
                 <span>₹{sgst.toFixed(2)}</span>
               </div>
-              <Separator />
-              <div className="flex justify-between font-bold text-lg text-primary">
-                <span>Total (Incl. GST)</span>
+              <Separator className="bg-primary/20" />
+              <div className="flex justify-between font-bold text-xl text-primary">
+                <span>Total</span>
                 <span>₹{order.totalAmount.toLocaleString('en-IN')}</span>
               </div>
-              <div className="flex justify-between text-sm font-medium pt-2">
+              <div className="flex justify-between text-sm font-semibold pt-2 text-red-600">
                 <span>Balance Due</span>
-                <span className="text-red-600">₹{order.balanceDue.toLocaleString('en-IN')}</span>
+                <span>₹{order.balanceDue.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
@@ -122,29 +129,27 @@ export default function InvoicePage() {
           {/* Footer/Payment */}
           <div className="grid grid-cols-2 gap-8 pt-12">
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Payment Status:</h3>
-              <div className="flex items-center gap-2 text-green-600">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Payment Info:</h3>
+              <div className="flex items-center gap-2 text-green-700">
                 <CheckCircle2 className="h-5 w-5" />
-                <span className="font-semibold">Integrated with Razorpay</span>
+                <span className="font-bold">Razorpay Secure Integrated</span>
               </div>
-              <p className="text-xs text-muted-foreground italic">
-                Reminders sent via Gupshup WhatsApp API
+              <p className="text-xs text-muted-foreground">
+                Payment Link sent via Gupshup WhatsApp Business
               </p>
             </div>
             <div className="flex flex-col items-end gap-2 text-right">
-              <QrCode className="h-24 w-24 text-slate-300" />
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Scan to Pay via Razorpay</p>
+              <QrCode className="h-24 w-24 text-primary opacity-20" />
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Scan to Pay securely</p>
             </div>
           </div>
 
-          <div className="text-center pt-8 border-t">
-            <p className="text-sm font-medium text-primary italic">"Krishna-bhakti-rasa-bhavita matih kriya-bhakti-rasa-bhavitah"</p>
-            <p className="text-[10px] text-muted-foreground mt-2 italic">This is a computer generated document. No signature required.</p>
+          <div className="text-center pt-8 border-t border-primary/10">
+            <p className="text-base font-bold text-primary italic">"Higher Taste - Serving Satvik Excellence"</p>
+            <p className="text-[10px] text-muted-foreground mt-2 italic">Computer generated invoice. ISKCON Delhi - Higher Taste Unit.</p>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-
-const Separator = () => <div className="h-px bg-slate-200 w-full" />;

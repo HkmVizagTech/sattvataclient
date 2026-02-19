@@ -8,10 +8,11 @@ import {
   Users,
   ChefHat,
   CreditCard,
-  Settings,
+  Settings as SettingsIcon,
   LogOut,
   Menu as MenuIcon
 } from "lucide-react";
+import logoImg from "@assets/HIgher_taste_logo_1771483400145.png";
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -25,17 +26,18 @@ export function Sidebar() {
     { href: "/menu", label: "Menu", icon: MenuIcon },
     { href: "/payments", label: "Payments", icon: CreditCard },
     { href: "/kitchen", label: "Kitchen View", icon: ChefHat },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 items-center border-b border-sidebar-border px-6">
-        <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ChefHat className="h-5 w-5" />
+      <div className="flex h-20 items-center border-b border-sidebar-border px-4 py-2">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <img src={logoImg} alt="Higher Taste" className="h-12 w-auto object-contain bg-white rounded p-1" />
+          <div className="flex flex-col">
+            <span className="font-bold text-lg leading-tight tracking-tight">The Higher</span>
+            <span className="font-bold text-lg leading-tight tracking-tight text-primary-foreground/80">Taste</span>
           </div>
-          <span>CaterOps</span>
         </div>
       </div>
       
@@ -44,12 +46,16 @@ export function Sidebar() {
           {navItems.map((item) => {
             const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
             return (
-              <Link key={item.href} href={item.href} className={cn(
+              <Link key={item.href} href={item.href}>
+                <a
+                  className={cn(
                     "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
-                    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/70"
-                  )}>
+                    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-4 border-primary pl-2" : "text-sidebar-foreground/70"
+                  )}
+                >
                   <item.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-sidebar-foreground/50 group-hover:text-primary")} />
                   {item.label}
+                </a>
               </Link>
             );
           })}
@@ -59,10 +65,10 @@ export function Sidebar() {
       <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3 rounded-md bg-sidebar-accent/50 px-3 py-3">
           <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-            JD
+            AD
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="truncate text-sm font-medium">John Doe</p>
+            <p className="truncate text-sm font-medium">Arjun Das</p>
             <p className="truncate text-xs text-muted-foreground">Admin</p>
           </div>
           <button className="text-muted-foreground hover:text-foreground">
