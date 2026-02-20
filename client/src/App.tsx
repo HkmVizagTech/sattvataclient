@@ -17,6 +17,7 @@ import Payments from "@/pages/payments";
 import Kitchen from "@/pages/kitchen";
 import InvoicePage from "@/pages/invoice";
 import Settings from "@/pages/settings";
+import FeedbackPage from "@/pages/feedback";
 import { Layout } from "@/components/layout";
 
 function Router() {
@@ -25,7 +26,6 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/orders" component={Orders} />
-        <Route path="/orders/new" component={OrderDetails} />
         <Route path="/orders/:id" component={OrderDetails} />
         <Route path="/orders/:id/invoice" component={InvoicePage} />
         <Route path="/calendar" component={CalendarPage} />
@@ -37,6 +37,7 @@ function Router() {
         <Route path="/quotes/:id" component={QuoteDetails} />
         <Route path="/payments" component={Payments} />
         <Route path="/kitchen" component={Kitchen} />
+        <Route path="/feedback" component={FeedbackPage} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>

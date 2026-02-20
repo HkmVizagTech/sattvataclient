@@ -22,19 +22,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { mockCustomers as initialCustomers, mockMenu } from "@/lib/mockData";
-import { CalendarIcon, Trash2, Plus, CreditCard, Truck, User, CheckCircle2, AlertCircle, UserPlus, Save } from "lucide-react";
+import { mockCustomers as initialCustomers, mockMenu, mockOrders } from "@/lib/mockData";
+import { 
+  CalendarIcon, 
+  Trash2, 
+  Plus, 
+  CreditCard, 
+  Truck, 
+  User, 
+  CheckCircle2, 
+  Save,
+  MapPin,
+  History
+} from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
-// --- Schema Definition ---
 const orderSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
   eventDate: z.date({ required_error: "Event date is required" }),
@@ -48,12 +56,10 @@ const orderSchema = z.object({
     quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
     notes: z.string().optional(),
   })).min(1, "Add at least one menu item"),
-  // Payment Section
   paymentMethod: z.enum(["UPI", "Gateway", "Cash"]),
   paymentAmount: z.coerce.number().min(0),
-  paymentReference: z.string().optional(), // UTR or Cash Collector Name
-  paymentContact: z.string().optional(), // Cash Collector Phone
-  // Dispatch Section
+  paymentReference: z.string().optional(),
+  paymentContact: z.string().optional(),
   vehicleNumber: z.string().optional(),
   driverName: z.string().optional(),
   driverPhone: z.string().optional(),
@@ -61,20 +67,35 @@ const orderSchema = z.object({
 
 type OrderFormValues = z.infer<typeof orderSchema>;
 
+const workflowStages = [
+  { id: "Draft", label: "Quotation" },
+  { id: "Confirmed", label: "Converted" },
+  { id: "In-Prep", label: "In Production" },
+  { id: "Dispatched", label: "Out for Delivery" },
+  { id: "Delivered", label: "Delivered" }
+];
+
 export default function OrderDetails() {
   const { id } = useParams();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const order = mockOrders.find(o => o.id === id);
   const isEditMode = !!id;
-  const [customers, setCustomers] = useState(initialCustomers);
-  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "", company: "" });
 
-  // Mock initial data if editing (simplified for prototype)
-  const defaultValues: Partial<OrderFormValues> = {
-    status: "Draft",
-    items: [{ menuItemId: "", quantity: 10 }],
+  const defaultValues: Partial<OrderFormValues> = order ? {
+    customerId: "C-001",
+    eventDate: new Date(order.eventDate),
+    eventTime: "12:00",
+    venue: order.venue,
+    headcount: order.headcount,
+    status: order.status,
+    items: order.items.map(() => ({ menuItemId: "V-001", quantity: 50 })),
     paymentMethod: "UPI",
+    paymentAmount: order.totalAmount - order.balanceDue,
+  } : {
+    status: "Draft" as const,
+    items: [{ menuItemId: "", quantity: 10 }],
+    paymentMethod: "UPI" as const,
     paymentAmount: 0,
     headcount: 50,
   };
@@ -90,32 +111,16 @@ export default function OrderDetails() {
     name: "items",
   });
 
-  // Calculate totals
   const watchedItems = form.watch("items");
   const subtotal = watchedItems.reduce((acc, item) => {
     const menuItem = mockMenu.find(m => m.id === item.menuItemId);
     return acc + (menuItem?.price || 0) * (item.quantity || 0);
   }, 0);
-  const tax = subtotal * 0.05; // 5% GST mock
+  const tax = subtotal * 0.05;
   const total = subtotal + tax;
-
-  const handleAddCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return;
-    const customer = {
-      id: `C-${Date.now()}`,
-      ...newCustomer,
-      totalOrders: 0,
-      outstandingBalance: 0
-    };
-    setCustomers([...customers, customer]);
-    form.setValue("customerId", customer.id);
-    setIsCustomerDialogOpen(false);
-    setNewCustomer({ name: "", phone: "", email: "", company: "" });
-    toast({ title: "Customer Added", description: `${customer.name} has been added and selected.` });
-  };
+  const currentStatus = form.watch("status");
 
   const onSubmit = (data: OrderFormValues) => {
-    console.log("Form Data:", data);
     toast({
       title: isEditMode ? "Order Updated" : "Order Created",
       description: `Order for ${format(data.eventDate, "PPP")} has been saved.`,
@@ -127,99 +132,67 @@ export default function OrderDetails() {
     <div className="space-y-6 pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{isEditMode ? "Edit Order" : "New Order"}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-primary">Order Management</h1>
           <p className="text-muted-foreground mt-1">
             {isEditMode ? `Managing Order #${id}` : "Create a new catering order"}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setLocation("/orders")}>Cancel</Button>
-          <Button onClick={form.handleSubmit(onSubmit)}><Save className="mr-2 h-4 w-4" /> Save Order</Button>
+          <Button onClick={form.handleSubmit(onSubmit)}><Save className="mr-2 h-4 w-4" /> Save Changes</Button>
         </div>
       </div>
 
+      <Card className="bg-muted/30 border-primary/20">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between relative">
+            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0" />
+            {workflowStages.map((stage, index) => {
+              const stageIndex = workflowStages.findIndex(s => s.id === currentStatus);
+              const isPast = index < stageIndex;
+              const isCurrent = index === stageIndex;
+              return (
+                <div key={stage.id} className="relative z-10 flex flex-col items-center gap-2">
+                  <div className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                    isPast ? "bg-primary border-primary text-white" : 
+                    isCurrent ? "bg-white border-primary text-primary ring-4 ring-primary/20 scale-110" : 
+                    "bg-white border-slate-300 text-slate-400"
+                  )}>
+                    {isPast ? <CheckCircle2 className="h-5 w-5" /> : <span>{index + 1}</span>}
+                  </div>
+                  <span className={cn(
+                    "text-[10px] font-bold uppercase tracking-wider text-center max-w-[80px]",
+                    isCurrent ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    {stage.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* LEFT COLUMN: Main Order Details */}
             <div className="lg:col-span-2 space-y-6">
-              
-              {/* 1. Event Details Card */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5 text-primary" /> Event Details
+                    <MapPin className="h-5 w-5 text-primary" /> Delivery Logistics
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
-                    name="customerId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex justify-between items-center">
-                          Customer
-                          <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-primary flex items-center gap-1 hover:underline p-0">
-                                <UserPlus className="h-3 w-3" /> New Customer
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Add New Customer</DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                  <label className="text-sm font-medium">Full Name</label>
-                                  <Input value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})} placeholder="e.g. Rahul Sharma" />
-                                </div>
-                                <div className="grid gap-2">
-                                  <label className="text-sm font-medium">Phone</label>
-                                  <Input value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})} placeholder="+91..." />
-                                </div>
-                                <div className="grid gap-2">
-                                  <label className="text-sm font-medium">Email (Optional)</label>
-                                  <Input value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})} placeholder="rahul@example.com" />
-                                </div>
-                                <div className="grid gap-2">
-                                  <label className="text-sm font-medium">Company (Optional)</label>
-                                  <Input value={newCustomer.company} onChange={e => setNewCustomer({...newCustomer, company: e.target.value})} placeholder="Company Name" />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button type="button" onClick={handleAddCustomer}>Add & Select</Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select customer" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {customers.map(c => (
-                              <SelectItem key={c.id} value={c.id}>{c.name} ({c.company || 'Personal'})</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="venue"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Venue Address</FormLabel>
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Delivery Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Grand Hyatt Hall A" {...field} />
+                          <Input placeholder="Enter full venue address" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -231,36 +204,18 @@ export default function OrderDetails() {
                     name="eventDate"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Event Date</FormLabel>
+                        <FormLabel>Delivery Date</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
+                              <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
+                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                           </PopoverContent>
                         </Popover>
                         <FormMessage />
@@ -268,42 +223,26 @@ export default function OrderDetails() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                     <FormField
-                      control={form.control}
-                      name="eventTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Time</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="headcount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Headcount</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="eventTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery Time</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
-              {/* 2. Menu Selection Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" /> Menu Selection
+                    <User className="h-5 w-5 text-primary" /> Menu & Items
                   </CardTitle>
                   <Button type="button" variant="outline" size="sm" onClick={() => append({ menuItemId: "", quantity: 10 })}>
                     <Plus className="h-4 w-4 mr-2" /> Add Item
@@ -311,24 +250,18 @@ export default function OrderDetails() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {fields.map((field, index) => (
-                    <div key={field.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-end border-b pb-4 last:border-0 last:pb-0">
+                    <div key={field.id} className="flex gap-4 items-end border-b pb-4 last:border-0">
                       <FormField
                         control={form.control}
                         name={`items.${index}.menuItemId`}
                         render={({ field }) => (
-                          <FormItem className="flex-1 w-full">
+                          <FormItem className="flex-1">
                             <FormLabel className={index !== 0 ? "sr-only" : ""}>Item</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select item" />
-                                </SelectTrigger>
-                              </FormControl>
+                              <FormControl><SelectTrigger><SelectValue placeholder="Select item" /></SelectTrigger></FormControl>
                               <SelectContent>
                                 {mockMenu.map(m => (
-                                  <SelectItem key={m.id} value={m.id}>
-                                    {m.name} - ₹{m.price} ({m.isVeg ? 'Veg' : 'Non-Veg'})
-                                  </SelectItem>
+                                  <SelectItem key={m.id} value={m.id}>{m.name} - ₹{m.price}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -341,244 +274,114 @@ export default function OrderDetails() {
                         render={({ field }) => (
                           <FormItem className="w-24">
                             <FormLabel className={index !== 0 ? "sr-only" : ""}>Qty</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
+                            <FormControl><Input type="number" {...field} /></FormControl>
                           </FormItem>
                         )}
                       />
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-destructive hover:text-destructive/90"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Button type="button" variant="ghost" size="icon" className="text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   ))}
                   
-                  <div className="flex justify-end pt-4 space-y-1 flex-col items-end border-t mt-4">
-                    <div className="flex justify-between w-48 text-sm">
-                      <span className="text-muted-foreground">Subtotal:</span>
-                      <span>₹{subtotal.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between w-48 text-sm">
-                      <span className="text-muted-foreground">GST (5%):</span>
-                      <span>₹{tax.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between w-48 font-bold text-lg mt-2">
-                      <span>Total:</span>
-                      <span className="text-primary">₹{total.toLocaleString()}</span>
-                    </div>
+                  <div className="flex justify-end pt-4 flex-col items-end">
+                    <div className="text-sm text-muted-foreground">Total: <span className="text-lg font-bold text-primary ml-2">₹{total.toLocaleString()}</span></div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* 3. Dispatch Details (Collapsible/Optional) */}
-               <Card>
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-primary" /> Dispatch Logistics
+                    <CreditCard className="h-5 w-5 text-primary" /> Payment Management
                   </CardTitle>
-                  <CardDescription>Vehicle and driver assignment (Optional for Draft)</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="vehicleNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vehicle No.</FormLabel>
-                        <FormControl>
-                          <Input placeholder="MH-12-AB-1234" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="driverName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Driver Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="driverPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Driver Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+91..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Channel</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="UPI">UPI / GPay</SelectItem>
+                              <SelectItem value="Gateway">Razorpay Link</SelectItem>
+                              <SelectItem value="Cash">Cash Collection</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <div className="pt-2">
+                         <span className={cn("px-2 py-1 rounded text-[10px] font-bold text-white", total - form.watch("paymentAmount") === 0 ? "bg-green-600" : "bg-amber-600")}>
+                          {total - form.watch("paymentAmount") === 0 ? "Fully Paid" : "Partial Payment"}
+                        </span>
+                      </div>
+                    </FormItem>
+                    <FormItem>
+                      <FormLabel>Outstanding</FormLabel>
+                      <div className="pt-2 font-bold text-red-600">₹{(total - form.watch("paymentAmount")).toLocaleString()}</div>
+                    </FormItem>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4" /> Transaction History</h4>
+                    <div className="rounded-md border bg-muted/20 overflow-hidden">
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell className="text-xs">20 Feb 2026</TableCell>
+                            <TableCell className="text-xs font-medium">Advance Received (UPI)</TableCell>
+                            <TableCell className="text-xs text-right font-bold text-green-600">₹{form.watch("paymentAmount").toLocaleString()}</TableCell>
+                          </TableRow>
+                          <TableRow className="bg-white">
+                            <TableCell colSpan={2} className="text-xs font-bold text-right">Balance Due</TableCell>
+                            <TableCell className="text-xs text-right font-bold text-red-600">₹{(total - form.watch("paymentAmount")).toLocaleString()}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* RIGHT COLUMN: Sidebar-style Actions */}
             <div className="space-y-6">
-              
-              {/* Status Card */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Status & Workflow</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Status Controls</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
                     control={form.control}
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
+                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                           <SelectContent>
-                            <SelectItem value="Draft">Draft</SelectItem>
-                            <SelectItem value="Confirmed">Confirmed</SelectItem>
-                            <SelectItem value="In-Prep">In-Prep</SelectItem>
-                            <SelectItem value="Dispatched">Dispatched</SelectItem>
-                            <SelectItem value="Delivered">Delivered</SelectItem>
+                            {workflowStages.map(s => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
                             <SelectItem value="Completed">Completed</SelectItem>
                             <SelectItem value="Cancelled">Cancelled</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
-                  <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
-                    <p className="font-semibold mb-1 flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" /> Auto-Actions
-                    </p>
-                    <ul className="list-disc pl-4 space-y-1">
-                      <li>Kitchen notified 24h prior</li>
-                      <li>Payment reminders sent automatically</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Payment Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" /> Payments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Collect via</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="UPI">UPI (Manual)</SelectItem>
-                            <SelectItem value="Gateway">Payment Link (Gateway)</SelectItem>
-                            <SelectItem value="Cash">Cash</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="paymentAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount to Collect Now</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} />
-                        </FormControl>
-                         <FormDescription className="text-xs">
-                          Suggested: 50% Advance (₹{(total * 0.5).toFixed(0)})
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {form.watch("paymentMethod") === "UPI" && (
-                    <FormField
-                      control={form.control}
-                      name="paymentReference"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>UPI Transaction ID (UTR)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter 12-digit UTR" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                  
-                  {form.watch("paymentMethod") === "Cash" && (
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="paymentReference"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Collector Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Received by..." {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                       <FormField
-                        control={form.control}
-                        name="paymentContact"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Collector Phone</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+91..." {...field} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                  {currentStatus === "Completed" && (
+                    <div className="bg-green-50 border border-green-200 p-3 rounded-lg flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                      <div className="text-xs text-green-800">
+                        <p className="font-bold">Order Completed!</p>
+                        <p>Feedback request sent to customer via WhatsApp.</p>
+                      </div>
                     </div>
                   )}
-
-                  {form.watch("paymentMethod") === "Gateway" && (
-                     <div className="bg-blue-50 p-3 rounded-md border border-blue-100 text-xs text-blue-800 flex items-start gap-2">
-                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                       <p>A payment link will be generated and sent to the customer via WhatsApp/SMS upon saving.</p>
-                     </div>
-                  )}
-                  
                 </CardContent>
               </Card>
-
             </div>
           </div>
         </form>

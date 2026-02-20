@@ -10,7 +10,8 @@ import {
   CreditCard,
   Settings as SettingsIcon,
   LogOut,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  MessageSquare
 } from "lucide-react";
 import logoImg from "@assets/HIgher_taste_logo_1771483400145.png";
 
@@ -26,6 +27,7 @@ export function Sidebar() {
     { href: "/menu", label: "Menu", icon: MenuIcon },
     { href: "/payments", label: "Payments", icon: CreditCard },
     { href: "/kitchen", label: "Kitchen View", icon: ChefHat },
+    { href: "/feedback", label: "Feedback", icon: MessageSquare },
     { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 

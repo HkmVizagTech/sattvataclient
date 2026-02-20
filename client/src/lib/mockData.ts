@@ -31,6 +31,16 @@ export interface Customer {
   outstandingBalance: number;
 }
 
+export interface Feedback {
+  id: string;
+  orderId: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  date: string;
+  tags: string[];
+}
+
 export const mockOrders: Order[] = [
   {
     id: "ORD-HT-001",
@@ -47,7 +57,7 @@ export const mockOrders: Order[] = [
   {
     id: "ORD-HT-002",
     customerName: "Reliance Satvik Lunch",
-    eventDate: "2024-10-28",
+    eventDate: "2026-02-20",
     status: "In-Prep",
     totalAmount: 45000,
     balanceDue: 0,
@@ -58,13 +68,24 @@ export const mockOrders: Order[] = [
   {
     id: "ORD-HT-003",
     customerName: "Sharma Family Wedding",
-    eventDate: "2024-11-02",
-    status: "Draft",
+    eventDate: "2026-02-21",
+    status: "Confirmed",
     totalAmount: 850000,
     balanceDue: 850000,
     items: ["Maha Prasad", "56 Bhog Selection"],
     venue: "The Leela Palace, Udaipur",
     headcount: 2000
+  },
+  {
+    id: "ORD-HT-004",
+    customerName: "Amit Goenka Office Puja",
+    eventDate: "2026-02-25",
+    status: "Draft",
+    totalAmount: 15000,
+    balanceDue: 15000,
+    items: ["Satvik Snacks", "Masala Tea"],
+    venue: "Goenka Group HQ, Nariman Point",
+    headcount: 30
   }
 ];
 
@@ -87,9 +108,14 @@ export const mockCustomers: Customer[] = [
   { id: "C-003", name: "Amit Goenka", email: "amit@goenkagroup.com", phone: "+91 22 2426 0321", company: "Goenka Group", totalOrders: 45, outstandingBalance: 12000 },
 ];
 
+export const mockFeedback: Feedback[] = [
+  { id: "FB-001", orderId: "ORD-HT-001", customerName: "Rajesh Malhotra", rating: 5, comment: "Excellent food, the Kheer was divine!", date: "2024-10-26", tags: ["Quality", "Service"] },
+  { id: "FB-002", orderId: "ORD-HT-002", customerName: "Priya Sharma", rating: 4, comment: "Very good service, timely delivery.", date: "2026-02-21", tags: ["Punctuality"] },
+];
+
 export const mockStats = [
-  { title: "Pending Fulfillments", value: "8", change: "+3 today", icon: "Clock" },
-  { title: "Payments Pending", value: "₹4.85L", change: "Monthly Growth: 12%", icon: "IndianRupee" },
-  { title: "Upcoming Events", value: "12", change: "Next 14 days", icon: "Calendar" },
-  { title: "Active Quotes", value: "15", change: "5 pending approval", icon: "FileText" },
+  { title: "Today's Orders", value: "1", change: "Fulfilling now", icon: "Clock" },
+  { title: "Tomorrow's Orders", value: "1", change: "Prep started", icon: "Calendar" },
+  { title: "Next Week's Orders", value: "1", change: "3 tentative", icon: "Calendar" },
+  { title: "Total Revenue", value: "₹4.85L", change: "+12% vs last month", icon: "IndianRupee" },
 ];
