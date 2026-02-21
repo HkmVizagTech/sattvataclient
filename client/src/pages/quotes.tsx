@@ -3,12 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, FileText, Send, Check, ArrowUpRight, ShoppingCart } from "lucide-react";
+import { Plus, Search, FileText, Send, Check, ArrowUpRight, ShoppingCart, Calendar, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
-const mockQuotes = [
+interface Quote {
+  id: string;
+  customer: string;
+  date: string;
+  amount: number;
+  status: string;
+  validUntil: string;
+}
+
+const mockQuotes: Quote[] = [
   { id: "QT-1001", customer: "TechStart Inc", date: "2024-10-20", amount: 85000, status: "Sent", validUntil: "2024-10-27" },
   { id: "QT-1002", customer: "Private Birthday", date: "2024-10-21", amount: 45000, status: "Draft", validUntil: "2024-10-28" },
   { id: "QT-1003", customer: "Acme Corp", date: "2024-10-18", amount: 125000, status: "Accepted", validUntil: "2024-10-25" },
@@ -16,14 +26,21 @@ const mockQuotes = [
 
 export default function Quotes() {
   const { toast } = useToast();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [conversionData, setConversionData] = useState({ date: "", venue: "", headcount: "" });
 
-  const handleConvert = (id: string) => {
+  const handleConvert = () => {
+    if (!conversionData.date || !conversionData.venue || !conversionData.headcount || !selectedQuote) {
+      toast({ title: "Missing Information", description: "Please fill in all required delivery details.", variant: "destructive" });
+      return;
+    }
     toast({
       title: "Quotation Converted",
-      description: `Quote ${id} has been successfully converted into an active Order.`,
+      description: `Quote ${selectedQuote.id} has been successfully converted into an active Order.`,
     });
-    setLocation(`/orders/ORD-HT-${id.split('-').pop()}`);
+    setSelectedQuote(null);
+    setLocation(`/orders/ORD-HT-${selectedQuote.id.split('-').pop()}`);
   };
 
   return (
@@ -86,9 +103,37 @@ export default function Quotes() {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       {quote.status === "Accepted" ? (
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 gap-1.5" onClick={() => handleConvert(quote.id)}>
-                          <ShoppingCart className="h-3.5 w-3.5" /> Convert to Order
-                        </Button>
+                        <Dialog open={selectedQuote?.id === quote.id} onOpenChange={(open) => !open && setSelectedQuote(null)}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" className="bg-primary hover:bg-primary/90 gap-1.5" onClick={() => setSelectedQuote(quote)}>
+                              <ShoppingCart className="h-3.5 w-3.5" /> Convert
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Convert Quote to Order</DialogTitle>
+                              <DialogDescription>Please provide delivery details for Quote {quote.id}.</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid gap-2">
+                                <label className="text-sm font-medium flex items-center gap-2"><Calendar className="h-4 w-4" /> Delivery Date</label>
+                                <Input type="date" value={conversionData.date} onChange={e => setConversionData({...conversionData, date: e.target.value})} />
+                              </div>
+                              <div className="grid gap-2">
+                                <label className="text-sm font-medium flex items-center gap-2"><MapPin className="h-4 w-4" /> Delivery Address</label>
+                                <Input value={conversionData.venue} onChange={e => setConversionData({...conversionData, venue: e.target.value})} placeholder="Full Venue Address" />
+                              </div>
+                              <div className="grid gap-2">
+                                <label className="text-sm font-medium flex items-center gap-2"><Users className="h-4 w-4" /> Guest Count</label>
+                                <Input type="number" value={conversionData.headcount} onChange={e => setConversionData({...conversionData, headcount: e.target.value})} placeholder="Estimated Headcount" />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setSelectedQuote(null)}>Cancel</Button>
+                              <Button onClick={handleConvert}>Create Order</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       ) : (
                         <Button variant="ghost" size="sm" onClick={() => toast({ title: "WhatsApp Sent", description: "Quotation link has been shared with client." })}>
                           <Send className="h-3.5 w-3.5 mr-1" /> Share

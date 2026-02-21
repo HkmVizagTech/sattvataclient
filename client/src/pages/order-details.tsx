@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
@@ -37,11 +37,13 @@ import {
   CheckCircle2, 
   Save,
   MapPin,
-  History
+  History,
+  UserPlus
 } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 const orderSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
@@ -81,6 +83,9 @@ export default function OrderDetails() {
   const { toast } = useToast();
   const order = mockOrders.find(o => o.id === id);
   const isEditMode = !!id;
+  const [customers, setCustomers] = useState(initialCustomers);
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: "", phone: "", email: "", company: "" });
 
   const defaultValues: Partial<OrderFormValues> = order ? {
     customerId: "C-001",
@@ -119,6 +124,21 @@ export default function OrderDetails() {
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
   const currentStatus = form.watch("status");
+
+  const handleAddCustomer = () => {
+    if (!newCustomer.name || !newCustomer.phone) return;
+    const customer = {
+      id: `C-${Date.now()}`,
+      ...newCustomer,
+      totalOrders: 0,
+      outstandingBalance: 0
+    };
+    setCustomers([...customers, customer]);
+    form.setValue("customerId", customer.id);
+    setIsCustomerDialogOpen(false);
+    setNewCustomer({ name: "", phone: "", email: "", company: "" });
+    toast({ title: "Customer Added", description: `${customer.name} has been added and selected.` });
+  };
 
   const onSubmit = (data: OrderFormValues) => {
     toast({
@@ -187,9 +207,47 @@ export default function OrderDetails() {
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
+                    name="customerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-sm font-medium">Customer</label>
+                          <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-primary p-0">
+                                <UserPlus className="h-3 w-3 mr-1" /> New Customer
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader><DialogTitle>Add New Customer</DialogTitle></DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <Input value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})} placeholder="Full Name" />
+                                <Input value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})} placeholder="Phone" />
+                                <Input value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})} placeholder="Email" />
+                                <Input value={newCustomer.company} onChange={e => setNewCustomer({...newCustomer, company: e.target.value})} placeholder="Company" />
+                              </div>
+                              <DialogFooter><Button type="button" onClick={handleAddCustomer}>Add & Select</Button></DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {customers.map(c => (
+                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="venue"
                     render={({ field }) => (
-                      <FormItem className="md:col-span-2">
+                      <FormItem>
                         <FormLabel>Delivery Address</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter full venue address" {...field} />
@@ -232,6 +290,17 @@ export default function OrderDetails() {
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="headcount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Headcount</FormLabel>
+                        <FormControl><Input type="number" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
