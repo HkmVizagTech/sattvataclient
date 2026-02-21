@@ -57,7 +57,7 @@ export function Sidebar() {
                 >
                   <item.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-sidebar-foreground/50 group-hover:text-primary")} />
                   {item.label}
-                </a>
+                </div>
               </Link>
             );
           })}

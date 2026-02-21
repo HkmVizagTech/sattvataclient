@@ -15,6 +15,7 @@ import {
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { format, isToday, isTomorrow, isAfter, addDays, isBefore, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const today = new Date("2026-02-20"); // Fixed reference today for mock data
@@ -66,25 +67,27 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {mockStats.map((stat, i) => (
           <Link key={i} href={stat.title.includes('Orders') ? '/orders' : stat.title.includes('Quote') ? '/quotes' : '/payments'}>
-            <Card className="hover:shadow-lg transition-all border-none shadow-sm cursor-pointer group bg-gradient-to-br from-card to-secondary/30">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">
-                  {stat.title}
-                </CardTitle>
-                <div className="p-2 rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                  {stat.icon === "Clock" && <Clock size={18} />}
-                  {stat.icon === "IndianRupee" && <IndianRupee size={18} />}
-                  {stat.icon === "Calendar" && <Calendar size={18} />}
-                  {stat.icon === "FileText" && <FileText size={18} />}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-black">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <TrendingUp size={12} className="text-green-500" /> {stat.change}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="h-full">
+              <Card className="h-full hover:shadow-lg transition-all border-none shadow-sm cursor-pointer group bg-gradient-to-br from-card to-secondary/30">
+                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">
+                    {stat.title}
+                  </CardTitle>
+                  <div className="p-2 rounded-full bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                    {stat.icon === "Clock" && <Clock size={18} />}
+                    {stat.icon === "IndianRupee" && <IndianRupee size={18} />}
+                    {stat.icon === "Calendar" && <Calendar size={18} />}
+                    {stat.icon === "FileText" && <FileText size={18} />}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-black">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    <TrendingUp size={12} className="text-green-500" /> {stat.change}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </Link>
         ))}
       </div>
@@ -107,9 +110,9 @@ export default function Dashboard() {
               <div className="text-center py-8 text-muted-foreground italic text-sm border rounded-lg bg-muted/20">No orders for today</div>
             )}
             <Link href="/orders">
-              <Button variant="ghost" className="w-full mt-2 text-xs text-primary font-bold group">
+              <div className="w-full mt-2 text-xs text-primary font-bold group flex items-center justify-center p-2 rounded hover:bg-primary/5 cursor-pointer">
                 View All Today's Work <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              </div>
             </Link>
           </CardContent>
         </Card>
@@ -130,9 +133,9 @@ export default function Dashboard() {
               <div className="text-center py-8 text-muted-foreground italic text-sm border rounded-lg bg-muted/20">Clean slate for tomorrow</div>
             )}
              <Link href="/kitchen">
-              <Button variant="ghost" className="w-full mt-2 text-xs text-amber-600 font-bold group">
+              <div className="w-full mt-2 text-xs text-amber-600 font-bold group flex items-center justify-center p-2 rounded hover:bg-amber-50 cursor-pointer">
                 Check Kitchen Schedule <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              </div>
             </Link>
           </CardContent>
         </Card>
@@ -153,9 +156,9 @@ export default function Dashboard() {
               <div className="text-center py-8 text-muted-foreground italic text-sm border rounded-lg bg-muted/20">No large events confirmed yet</div>
             )}
             <Link href="/calendar">
-              <Button variant="ghost" className="w-full mt-2 text-xs text-blue-600 font-bold group">
+              <div className="w-full mt-2 text-xs text-blue-600 font-bold group flex items-center justify-center p-2 rounded hover:bg-blue-50 cursor-pointer">
                 Open Full Calendar <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              </div>
             </Link>
           </CardContent>
         </Card>
@@ -165,11 +168,3 @@ export default function Dashboard() {
   );
 }
 
-// Internal Button component since we can't import everything in one turn
-function Button({ children, variant, className, onClick }: any) {
-  const base = "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2";
-  const variants: any = {
-    ghost: "hover:bg-accent hover:text-accent-foreground",
-  };
-  return <button className={cn(base, variants[variant], className)} onClick={onClick}>{children}</button>;
-}
