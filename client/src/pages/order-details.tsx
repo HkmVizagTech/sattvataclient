@@ -395,7 +395,7 @@ export default function OrderDetails() {
                     </FormItem>
                     <FormItem>
                       <FormLabel>Outstanding</FormLabel>
-                      <div className="pt-2 font-bold text-red-600">₹{(total - form.watch("paymentAmount")).toLocaleString()}</div>
+                      <div className="pt-2 font-bold text-red-600">₹{(total - (form.watch("paymentAmount") || 0)).toLocaleString()}</div>
                     </FormItem>
                   </div>
 
@@ -409,11 +409,11 @@ export default function OrderDetails() {
                           <TableRow>
                             <TableCell className="text-xs">20 Feb 2026</TableCell>
                             <TableCell className="text-xs font-medium">Advance Received (UPI)</TableCell>
-                            <TableCell className="text-xs text-right font-bold text-green-600">₹{form.watch("paymentAmount").toLocaleString()}</TableCell>
+                            <TableCell className="text-xs text-right font-bold text-green-600">₹{(form.watch("paymentAmount") || 0).toLocaleString()}</TableCell>
                           </TableRow>
                           <TableRow className="bg-white">
                             <TableCell colSpan={2} className="text-xs font-bold text-right">Balance Due</TableCell>
-                            <TableCell className="text-xs text-right font-bold text-red-600">₹{(total - form.watch("paymentAmount")).toLocaleString()}</TableCell>
+                            <TableCell className="text-xs text-right font-bold text-red-600">₹{(total - (form.watch("paymentAmount") || 0)).toLocaleString()}</TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>
