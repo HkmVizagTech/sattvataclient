@@ -35,12 +35,19 @@ export default function Quotes() {
       toast({ title: "Missing Information", description: "Please fill in all required delivery details.", variant: "destructive" });
       return;
     }
+    
+    // In a real app, we'd save this to a DB. For the mockup, we just navigate to the order details
+    // using one of the existing mock IDs to avoid "order not found" crashes
+    const mockOrderId = "ORD-HT-001"; 
+    
     toast({
       title: "Quotation Converted",
       description: `Quote ${selectedQuote.id} has been successfully converted into an active Order.`,
     });
+    
+    // Navigate first, then clear state
+    setLocation(`/orders/${mockOrderId}`);
     setSelectedQuote(null);
-    setLocation(`/orders/ORD-HT-${selectedQuote.id.split('-').pop()}`);
   };
 
   return (

@@ -81,7 +81,10 @@ export default function OrderDetails() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const order = mockOrders.find(o => o.id === id);
+  
+  // Find order or fallback to first mock order if it looks like a converted ID
+  const order = mockOrders.find(o => o.id === id) || (id?.startsWith('ORD-HT-') ? mockOrders[0] : null);
+  
   const isEditMode = !!id;
   const [customers, setCustomers] = useState(initialCustomers);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
