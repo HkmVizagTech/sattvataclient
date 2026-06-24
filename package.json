@@ -6,7 +6,7 @@
   "scripts": {
     "dev:client": "vite dev --port 5173",
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "vite build",
+    "build": "vite build && esbuild server/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs --external:vite --external:@replit/vite-plugin-cartographer --external:@replit/vite-plugin-dev-banner --external:@replit/vite-plugin-runtime-error-modal",
     "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push"
