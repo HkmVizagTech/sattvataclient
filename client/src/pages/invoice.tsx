@@ -8,6 +8,8 @@ import { useParams } from "wouter";
 import { Separator } from "@/components/ui/separator";
 import logoImg from "@assets/HIgher_taste_logo_1771483400145.png";
 
+import { exportSingleOrderToPDF } from "@/lib/exportInvoices";
+
 export default function InvoicePage() {
   const { id } = useParams();
   const order = mockOrders.find(o => o.id === id) || mockOrders[0];
@@ -17,6 +19,10 @@ export default function InvoicePage() {
   const cgst = gst / 2;
   const sgst = gst / 2;
 
+  const handleDownload = () => {
+    exportSingleOrderToPDF(order);
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto py-8">
       <div className="flex items-center justify-between no-print">
@@ -25,7 +31,7 @@ export default function InvoicePage() {
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="h-4 w-4 mr-2" /> Print
           </Button>
-          <Button>
+          <Button onClick={handleDownload}>
             <Download className="h-4 w-4 mr-2" /> Download PDF
           </Button>
         </div>
@@ -37,9 +43,9 @@ export default function InvoicePage() {
           <div className="flex justify-between items-start">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <img src={logoImg} alt="Higher Taste" className="h-16 w-auto" />
+                <img src={logoImg} alt="Satvata Foods" className="h-16 w-auto" />
                 <div>
-                  <h1 className="text-3xl font-bold text-primary leading-none">The Higher Taste</h1>
+                  <h1 className="text-3xl font-bold text-primary leading-none">The Satvata Foods</h1>
                   <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mt-1">Catering Services</p>
                 </div>
               </div>
@@ -135,7 +141,7 @@ export default function InvoicePage() {
                 <span className="font-bold">Razorpay Secure Integrated</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Payment Link sent via Gupshup WhatsApp Business
+                Payment Link sent via Meta WhatsApp Cloud API
               </p>
             </div>
             <div className="flex flex-col items-end gap-2 text-right">
@@ -145,8 +151,8 @@ export default function InvoicePage() {
           </div>
 
           <div className="text-center pt-8 border-t border-primary/10">
-            <p className="text-base font-bold text-primary italic">"Higher Taste - Serving Satvik Excellence"</p>
-            <p className="text-[10px] text-muted-foreground mt-2 italic">Computer generated invoice. ISKCON Delhi - Higher Taste Unit.</p>
+            <p className="text-base font-bold text-primary italic">"Satvata Foods - Serving Satvik Excellence"</p>
+            <p className="text-[10px] text-muted-foreground mt-2 italic">Computer generated invoice. ISKCON Delhi - Satvata Foods Unit.</p>
           </div>
         </CardContent>
       </Card>

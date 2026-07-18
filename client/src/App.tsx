@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
@@ -15,33 +16,52 @@ import Quotes from "@/pages/quotes";
 import QuoteDetails from "@/pages/quote-details";
 import Payments from "@/pages/payments";
 import Kitchen from "@/pages/kitchen";
-import InvoicePage from "@/pages/invoice";
+import Invoices from "@/pages/invoices";
+import InvoiceDetails from "@/pages/invoice-details";
+import Expenses from "@/pages/expenses";
+import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import FeedbackPage from "@/pages/feedback";
+import AuthPage from "@/pages/AuthPage";
+import ForgotPasswordPage from "@/pages/forgot-password";
+import ResetPasswordPage from "@/pages/reset-password";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/layout";
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/orders" component={Orders} />
-        <Route path="/orders/:id" component={OrderDetails} />
-        <Route path="/orders/:id/invoice" component={InvoicePage} />
-        <Route path="/calendar" component={CalendarPage} />
-        <Route path="/menu" component={MenuPage} />
-        <Route path="/customers" component={Customers} />
-        <Route path="/customers/:id" component={CustomerDetails} />
-        <Route path="/quotes" component={Quotes} />
-        <Route path="/quotes/new" component={QuoteDetails} />
-        <Route path="/quotes/:id" component={QuoteDetails} />
-        <Route path="/payments" component={Payments} />
-        <Route path="/kitchen" component={Kitchen} />
-        <Route path="/feedback" component={FeedbackPage} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/reset-password/:token" component={ResetPasswordPage} />
+      
+      {/* Protected Routes (Wrapped in Layout) */}
+      <Route>
+        <Layout>
+          <Switch>
+            <ProtectedRoute path="/" component={Dashboard} />
+            <ProtectedRoute path="/orders" component={Orders} />
+            <ProtectedRoute path="/orders/:id" component={OrderDetails} />
+            <ProtectedRoute path="/invoices" component={Invoices} />
+            <ProtectedRoute path="/invoices/:id" component={InvoiceDetails} />
+            <ProtectedRoute path="/calendar" component={CalendarPage} />
+            <ProtectedRoute path="/menu" component={MenuPage} />
+            <ProtectedRoute path="/customers" component={Customers} />
+            <ProtectedRoute path="/customers/:id" component={CustomerDetails} />
+            <ProtectedRoute path="/quotes" component={Quotes} />
+            <ProtectedRoute path="/quotes/new" component={QuoteDetails} />
+            <ProtectedRoute path="/quotes/:id" component={QuoteDetails} />
+            <ProtectedRoute path="/payments" component={Payments} />
+            <ProtectedRoute path="/expenses" component={Expenses} />
+            <ProtectedRoute path="/reports" component={Reports} />
+            <ProtectedRoute path="/kitchen" component={Kitchen} />
+            <ProtectedRoute path="/feedback" component={FeedbackPage} />
+            <ProtectedRoute path="/settings" component={Settings} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 
@@ -50,6 +70,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <SonnerToaster position="top-right" expand={true} richColors />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
